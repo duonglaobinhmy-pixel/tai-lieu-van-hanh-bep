@@ -1,0 +1,14 @@
+{
+    "name": "tai-lieu-van-hanh-bep",
+  
+    "main": "functions/_worker.js",
+  
+    "compatibility_date": "2026-07-20",
+  
+    "kv_namespaces": [
+      {
+        "binding": "DATA_KV",
+        "id": "c03993d11b05467f9b830296fbee9d81"
+      }
+    ]
+  }
