@@ -16,8 +16,8 @@ async function verifyAuth(request, env) {
   if (!header.startsWith("Bearer ")) return false;
   const token = header.slice(7);
   const [body, sig] = token.split(".");
-  if (!body || !sig || !env.AUTH_TOKEN_SECRET) return false;
-  const expected = base64url(await hmac(env.AUTH_TOKEN_SECRET, body));
+  if (!body || !sig || !env.PORTAL_PASSWORD) return false;
+  const expected = base64url(await hmac(env.PORTAL_PASSWORD, body));
   if (expected !== sig) return false;
   try {
     const normalized = body.replace(/-/g, "+").replace(/_/g, "/");

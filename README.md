@@ -1,5 +1,16 @@
 # Bếp Bình Mỹ · PM Handover Portal V5 — Cloudflare
 
+
+## Cấu hình mới: chỉ 1 mật khẩu
+
+Trong Cloudflare Pages → **Settings → Variables and Secrets**, chỉ cần tạo đúng một Secret:
+
+- Tên: `PORTAL_PASSWORD`
+- Giá trị: mật khẩu duy nhất dùng để mở portal.
+
+Sau khi đăng nhập, mọi thay đổi trong tài khoản, biên bản bàn giao, checklist và nhật ký sẽ tự lưu trực tiếp vào Cloudflare KV sau khoảng 2 giây. Nút **Lưu lên Cloudflare** vẫn được giữ để lưu thủ công ngay lập tức.
+
+Không còn cần `DOCS_PASSWORD_HASH` hoặc `AUTH_TOKEN_SECRET`.
 Phiên bản này lưu dữ liệu dùng chung qua:
 
 - Cloudflare Pages
@@ -48,35 +59,19 @@ Trong Cloudflare Dashboard:
    - KV namespace: `BBM_HANDOVER_DATA`
 6. Gắn binding cho cả Production và Preview nếu cần.
 
-## 4. Tạo biến bí mật
+## 4. Tạo một mật khẩu duy nhất
 
-Trong Pages project → **Settings** → **Variables and Secrets**, thêm:
+Trong Pages project → **Settings** → **Variables and Secrets**, thêm đúng một Secret:
 
-### DOCS_PASSWORD_HASH
+### PORTAL_PASSWORD
 
-SHA-256 của mật khẩu đăng nhập.
-
-Mật khẩu mặc định trong bản mẫu:
+Nhập trực tiếp mật khẩu muốn dùng để mở portal. Ví dụ:
 
 ```text
 BepBinhMy@2026
 ```
 
-SHA-256 tương ứng:
-
-```text
-80efd563cb36dc3250ef3c173119622d89a4375bec6193d16f17bf6af4c12287
-```
-
-### AUTH_TOKEN_SECRET
-
-Chuỗi bí mật dài, ngẫu nhiên. Ví dụ tự tạo bằng terminal:
-
-```bash
-openssl rand -hex 32
-```
-
-Không dùng ví dụ mẫu làm secret production.
+Có thể thay bằng mật khẩu riêng mạnh hơn. Không cần tạo SHA-256 và không cần thêm secret thứ hai.
 
 ## 5. Deploy
 
@@ -96,7 +91,7 @@ Sau deploy:
 
 - `GET /api/state`: tải trạng thái từ KV.
 - `PUT /api/state`: lưu trạng thái vào KV.
-- `POST /api/login`: xác thực mật khẩu và cấp token 8 giờ.
+- `POST /api/login`: xác thực mật khẩu duy nhất và cấp token đăng nhập 8 giờ.
 - Có kiểm tra version để hạn chế hai máy ghi đè lẫn nhau.
 - Có tự lưu sau khoảng 2 giây khi thay đổi dữ liệu.
 

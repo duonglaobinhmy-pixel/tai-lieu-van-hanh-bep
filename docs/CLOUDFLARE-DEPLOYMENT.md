@@ -5,8 +5,7 @@
 - [ ] Thư mục `functions/` được deploy.
 - [ ] KV namespace đã tạo.
 - [ ] Binding tên chính xác là `BBM_DATA`.
-- [ ] Đã thêm `DOCS_PASSWORD_HASH`.
-- [ ] Đã thêm `AUTH_TOKEN_SECRET`.
+- [ ] Đã thêm duy nhất secret `PORTAL_PASSWORD`.
 - [ ] Đã deploy production.
 - [ ] Đăng nhập thành công.
 - [ ] Lưu dữ liệu thành công.

@@ -1,5 +1,4 @@
 
-const PASSWORD_HASH = "80efd563cb36dc3250ef3c173119622d89a4375bec6193d16f17bf6af4c12287";
 const SESSION_KEY = "bbm_portal_authenticated_v5";
 const API_STATE = "/api/state";
 const API_LOGIN = "/api/login";
@@ -235,11 +234,13 @@ function scheduleAutoSave() {
 document.getElementById("addAccount").addEventListener("click",()=>{addAccountRow();scheduleAutoSave();});
 document.getElementById("saveAccounts").addEventListener("click",()=>saveCloudState(true));
 document.getElementById("addChange").addEventListener("click",()=>{addChangeRow();scheduleAutoSave();});
-document.addEventListener("input",e=>{
-  if(e.target.closest("#accounts")||e.target.closest("#change-log"))scheduleAutoSave();
+document.addEventListener("input", e => {
+  if (e.target.closest("#loginGate") || e.target.id === "globalSearch") return;
+  if (e.target.matches("input, textarea, select")) scheduleAutoSave();
 });
-document.addEventListener("change",e=>{
-  if(e.target.matches('input[type="checkbox"]')||e.target.closest("#accounts")||e.target.closest("#change-log"))scheduleAutoSave();
+document.addEventListener("change", e => {
+  if (e.target.closest("#loginGate")) return;
+  if (e.target.matches("input, textarea, select")) scheduleAutoSave();
 });
 
 document.getElementById("exportAccounts").addEventListener("click",()=>{
