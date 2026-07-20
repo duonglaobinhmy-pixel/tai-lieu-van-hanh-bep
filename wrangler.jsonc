@@ -1,14 +1,16 @@
 {
-    "name": "tai-lieu-van-hanh-bep",
-  
-    "main": "functions/_worker.js",
-  
-    "compatibility_date": "2026-07-20",
-  
-    "kv_namespaces": [
-      {
-        "binding": "DATA_KV",
-        "id": "c03993d11b05467f9b830296fbee9d81"
-      }
-    ]
-  }
+  "name": "tai-lieu-van-hanh-bep",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-20",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "kv_namespaces": [
+    {
+      "binding": "BBM_DATA",
+      "id": "c03993d11b05467f9b830296fbee9d81"
+    }
+  ]
+}
