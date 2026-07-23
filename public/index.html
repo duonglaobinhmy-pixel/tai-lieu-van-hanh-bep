@@ -52,7 +52,7 @@
         <span class="status-dot"></span>
         <div>
           <strong>Hệ thống vận hành</strong>
-          <small>Phiên bản tài liệu 6.1 · Security Layer</small>
+          <small>Phiên bản tài liệu 6.3 · User Management</small>
         </div>
       </div>
 
@@ -74,9 +74,10 @@
         <a href="#raci"><span>10</span> RACI & trách nhiệm</a>
         <a href="#acceptance"><span>11</span> Nghiệm thu bàn giao</a>
         <a href="#accounts" data-role="admin"><span>12</span> Tài khoản & liên kết</a>
-        <a href="#access-control" data-role="admin"><span>13</span> Phân quyền & IP</a>
-        <a href="#audit-log" data-role="admin"><span>14</span> Log truy cập IP</a>
-        <a href="#change-log"><span>15</span> Nhật ký thay đổi</a>
+        <a href="#access-control" data-role="admin"><span>13</span> Người dùng & phân quyền</a>
+        <a href="#system-settings" data-role="admin"><span>14</span> Cài đặt hệ thống</a>
+        <a href="#audit-log" data-role="admin"><span>15</span> Nhật ký đăng nhập</a>
+        <a href="#change-log"><span>16</span> Nhật ký thay đổi</a>
       </nav>
 
       <div class="sidebar-footer">
@@ -96,7 +97,7 @@
           <div class="meta-pill"><span>Đang đăng nhập</span><strong id="currentUserLabel">—</strong></div>
           <div class="meta-pill"><span>IP hiện tại</span><strong id="currentIpLabel">—</strong></div>
           <div class="meta-pill"><span>Owner</span><strong>Ban AI / Bếp Bình Mỹ</strong></div>
-          <div class="meta-pill"><span>Version</span><strong>6.1</strong></div>
+          <div class="meta-pill"><span>Version</span><strong>6.3</strong></div>
         </div>
       </header>
 
@@ -437,33 +438,18 @@
 
       <section id="access-control" class="section searchable" data-role="admin">
         <div class="section-header">
-          <div><span class="section-kicker">Access Governance</span><h2>Phân quyền người dùng và IP được phép</h2></div>
+          <div><span class="section-kicker">User Management</span><h2>Tài khoản và phân cấp quyền truy cập</h2></div>
           <div class="section-actions">
-            <button id="addUser" class="button button-secondary" type="button">+ Thêm user</button>
-            <button id="addCurrentIp" class="button button-secondary" type="button">+ Thêm IP hiện tại</button>
-            <button id="saveSecurity" class="button button-primary" type="button">Lưu chính sách bảo mật</button>
+            <button id="addUser" class="button button-secondary" type="button">+ Tạo tài khoản</button>
+            <button id="saveSecurity" class="button button-primary" type="button">Lưu tài khoản & quyền</button>
           </div>
-        </div>
-
-        <div id="securityWarning" class="callout warning">
-          <strong>Chế độ an toàn khi cài đặt:</strong> IP đang được ghi log nhưng chưa chặn. Hãy thêm ít nhất IP hiện tại, một IP dự phòng/VPN, rồi mới bật cưỡng chế.
-        </div>
-
-        <div class="security-control-grid">
-          <label class="security-toggle">
-            <input id="enforceIpAllowlist" type="checkbox" disabled>
-            <span><strong>Chặn IP đã tắt</strong><small>IP chỉ được ghi vào audit log, không dùng để từ chối tài khoản hợp lệ.</small></span>
-          </label>
-          <label>Thời gian phiên (phút)<input id="sessionTtlMinutes" type="number" min="15" max="720" value="240"></label>
-          <label>Số lần sai tối đa<input id="maxLoginAttempts" type="number" min="3" max="10" value="5"></label>
-          <label>Cửa sổ khóa (phút)<input id="loginWindowMinutes" type="number" min="5" max="60" value="15"></label>
         </div>
 
         <h3 class="subheading">User nào được vào và được làm gì</h3>
         <div class="role-matrix">
-          <article><strong>Admin gốc</strong><span>Toàn quyền tài liệu, link, tài khoản, user, IP và audit log; luôn được vào không phụ thuộc IP.</span></article>
+          <article><strong>Admin</strong><span>Toàn quyền tài liệu, liên kết, tài khoản, cài đặt và nhật ký đăng nhập.</span></article>
           <article><strong>Operator</strong><span>Đọc tài liệu, mở web vận hành, cập nhật checklist và nhật ký thay đổi.</span></article>
-          <article><strong>Viewer</strong><span>Chỉ đọc; không thấy kho tài khoản, chính sách IP hoặc log truy cập.</span></article>
+          <article><strong>Viewer</strong><span>Chỉ đọc tài liệu; không thấy tài khoản, cài đặt hoặc nhật ký đăng nhập.</span></article>
         </div>
         <div class="table-shell wide security-table-shell">
           <table>
@@ -472,20 +458,34 @@
           </table>
         </div>
 
-        <h3 class="subheading">IP / CIDR được phép</h3>
-        <p class="legend">IPv4 dùng <code>x.x.x.x/32</code> cho một IP hoặc CIDR hẹp. IPv6 hiện dùng địa chỉ chính xác. Mỗi rule gắn trực tiếp với vai trò được phép.</p>
-        <div class="table-shell wide security-table-shell">
-          <table>
-            <thead><tr><th>Tên IP</th><th>IP / CIDR</th><th>Vai trò được phép</th><th>Bật</th><th>Hết hạn</th><th>Ghi chú</th><th></th></tr></thead>
-            <tbody id="ipRuleRows"></tbody>
-          </table>
-        </div>
         <div id="securityMessage" class="form-message"></div>
+      </section>
+
+      <section id="system-settings" class="section searchable" data-role="admin">
+        <div class="section-header">
+          <div><span class="section-kicker">Portal Settings</span><h2>Cài đặt hệ thống đăng nhập</h2></div>
+          <button id="saveSystemSettings" class="button button-primary" type="button">Lưu cài đặt</button>
+        </div>
+        <div class="callout warning">
+          <strong>Admin mặc định:</strong> username <code>admin</code>, mật khẩu <code>BepBinhMy@2026</code> đã nằm trực tiếp trong Worker. Không cần tạo SESSION_SECRET.
+        </div>
+        <div class="security-control-grid">
+          <label>Thời gian phiên (phút)<input id="sessionTtlMinutes" type="number" min="15" max="720" value="240"></label>
+          <label>Số lần sai tối đa<input id="maxLoginAttempts" type="number" min="3" max="10" value="5"></label>
+          <label>Cửa sổ khóa (phút)<input id="loginWindowMinutes" type="number" min="5" max="60" value="15"></label>
+          <label class="security-toggle"><input id="enforceIpAllowlist" type="checkbox" disabled><span><strong>Không chặn IP</strong><small>IP chỉ ghi vào nhật ký để truy vết.</small></span></label>
+        </div>
+        <div class="role-matrix">
+          <article><strong>Quản lý tài khoản</strong><span>Tạo user, đổi mật khẩu, đổi vai trò và vô hiệu hóa tài khoản.</span></article>
+          <article><strong>Chống dò mật khẩu</strong><span>Tự khóa tạm theo số lần nhập sai và thời gian đã đặt.</span></article>
+          <article><strong>Phiên bảo mật</strong><span>Cookie HttpOnly, Secure và SameSite=Strict.</span></article>
+        </div>
+        <div id="systemSettingsMessage" class="form-message"></div>
       </section>
 
       <section id="audit-log" class="section searchable" data-role="admin">
         <div class="section-header">
-          <div><span class="section-kicker">Security Audit</span><h2>Nhật ký ai đã vào và vào từ IP nào</h2></div>
+          <div><span class="section-kicker">Login Audit</span><h2>Nhật ký đăng nhập tài khoản</h2></div>
           <button id="refreshAudit" class="button button-secondary" type="button">Làm mới log</button>
         </div>
         <div class="audit-summary">

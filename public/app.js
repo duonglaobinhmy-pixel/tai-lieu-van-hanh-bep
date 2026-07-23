@@ -33,12 +33,7 @@ const SECURITY_ERRORS = {
   ACTIVE_ADMIN_REQUIRED: "Phải còn ít nhất một Admin đang hoạt động.",
   PASSWORD_REQUIRED: "User mới phải có mật khẩu.",
   WEAK_PASSWORD: "Mật khẩu mới phải có ít nhất 12 ký tự.",
-  INVALID_IP_RULES: "Danh sách IP không hợp lệ.",
-  INVALID_IP_LABEL: "Tên rule IP bị trống hoặc trùng.",
-  INVALID_CIDR: "IP/CIDR không hợp lệ hoặc đang mở quá rộng.",
-  IP_ROLE_REQUIRED: "Mỗi IP phải cấp cho ít nhất một vai trò.",
-  INVALID_EXPIRY: "Ngày hết hạn IP không hợp lệ.",
-  CURRENT_IP_NOT_ALLOWED: "IP hiện tại chưa nằm trong rule dành cho Admin. Hệ thống không bật chặn để tránh tự khóa bạn."
+  ROOT_ADMIN_REQUIRED: "Không được xóa tài khoản Admin gốc."
 };
 
 function esc(value) {
@@ -501,50 +496,6 @@ function securityUsersData() {
   });
 }
 
-function datetimeLocalValue(isoValue) {
-  if (!isoValue) return "";
-  const date = new Date(isoValue);
-  if (Number.isNaN(date.getTime())) return "";
-  const offset = date.getTimezoneOffset() * 60000;
-  return new Date(date.getTime() - offset).toISOString().slice(0, 16);
-}
-
-function addIpRuleRow(rule = {}) {
-  const roles = rule.roles || ["admin"];
-  const row = document.createElement("tr");
-  row.dataset.id = rule.id || "";
-  row.innerHTML = `
-    <td><input data-ip="label" value="${esc(rule.label || "")}" placeholder="VD: Văn phòng quản trị"></td>
-    <td><input data-ip="cidr" value="${esc(rule.cidr || "")}" placeholder="203.0.113.10/32"></td>
-    <td><div class="role-checks">
-      <label><input type="checkbox" data-ip-role="admin" ${roles.includes("admin") ? "checked" : ""}> Admin</label>
-      <label><input type="checkbox" data-ip-role="operator" ${roles.includes("operator") ? "checked" : ""}> Operator</label>
-      <label><input type="checkbox" data-ip-role="viewer" ${roles.includes("viewer") ? "checked" : ""}> Viewer</label>
-    </div></td>
-    <td><input data-ip="enabled" type="checkbox" ${rule.enabled !== false ? "checked" : ""}></td>
-    <td><input data-ip="expiresAt" type="datetime-local" value="${datetimeLocalValue(rule.expiresAt)}"></td>
-    <td><textarea data-ip="notes">${esc(rule.notes || "")}</textarea></td>
-    <td><button class="delete-row" type="button">Xóa</button></td>`;
-  row.querySelector(".delete-row").addEventListener("click", () => row.remove());
-  document.getElementById("ipRuleRows").appendChild(row);
-}
-
-function ipRulesData() {
-  return [...document.querySelectorAll("#ipRuleRows tr")].map((row) => {
-    const value = (field) => row.querySelector(`[data-ip="${field}"]`);
-    const expiresAt = value("expiresAt").value;
-    return {
-      id: row.dataset.id,
-      label: value("label").value,
-      cidr: value("cidr").value,
-      roles: [...row.querySelectorAll("[data-ip-role]:checked")].map((input) => input.dataset.ipRole),
-      enabled: value("enabled").checked,
-      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : "",
-      notes: value("notes").value
-    };
-  });
-}
-
 function renderSecurity(policy) {
   securityPolicy = policy;
   document.getElementById("enforceIpAllowlist").checked = Boolean(policy.enforceIpAllowlist);
@@ -553,9 +504,6 @@ function renderSecurity(policy) {
   document.getElementById("loginWindowMinutes").value = Math.round(Number(policy.loginWindowSeconds || 900) / 60);
   document.getElementById("securityUserRows").innerHTML = "";
   policy.users.forEach(addSecurityUserRow);
-  document.getElementById("ipRuleRows").innerHTML = "";
-  policy.ipRules.forEach(addIpRuleRow);
-  document.getElementById("securityWarning").classList.toggle("hidden", Boolean(policy.enforceIpAllowlist));
   document.getElementById("currentIpLabel").textContent = policy.currentIp || currentSession.clientIp;
 }
 
@@ -581,14 +529,17 @@ async function saveSecurity() {
         maxLoginAttempts: Number(document.getElementById("maxLoginAttempts").value),
         loginWindowSeconds: Number(document.getElementById("loginWindowMinutes").value) * 60,
         users: securityUsersData(),
-        ipRules: ipRulesData()
+        ipRules: []
       })
     });
     renderSecurity(result.policy);
     message.className = "form-message success";
-    message.textContent = result.policy.enforceIpAllowlist
-      ? "Đã lưu. Từ bây giờ chỉ user đúng vai trò và IP hợp lệ mới vào được."
-      : "Đã lưu. IP vẫn đang ở chế độ ghi log, chưa cưỡng chế chặn.";
+    message.textContent = "Đã lưu tài khoản và phân quyền.";
+    const settingsMessage = document.getElementById("systemSettingsMessage");
+    if (settingsMessage) {
+      settingsMessage.className = "form-message success";
+      settingsMessage.textContent = "Đã lưu thời gian phiên và giới hạn đăng nhập.";
+    }
     await loadAudit();
   } catch (error) {
     message.className = "form-message error";
@@ -601,24 +552,8 @@ document.getElementById("addUser").addEventListener("click", () => addSecurityUs
   status: "active",
   hasPassword: false
 }));
-document.getElementById("addCurrentIp").addEventListener("click", () => {
-  const currentIp = securityPolicy?.currentIp || currentSession?.clientIp;
-  if (!currentIp) return;
-  const cidr = currentIp.includes(":") ? currentIp : `${currentIp}/32`;
-  const exists = ipRulesData().some((rule) => rule.cidr === cidr);
-  if (exists) {
-    document.getElementById("securityMessage").textContent = "IP hiện tại đã có trong danh sách.";
-    return;
-  }
-  addIpRuleRow({
-    label: "IP quản trị hiện tại",
-    cidr,
-    roles: ["admin"],
-    enabled: true,
-    notes: "Được thêm từ phiên Admin hiện tại"
-  });
-});
 document.getElementById("saveSecurity").addEventListener("click", saveSecurity);
+document.getElementById("saveSystemSettings").addEventListener("click", saveSecurity);
 
 function auditResultLabel(result) {
   return result === "allowed" ? "Cho phép" : "Từ chối";

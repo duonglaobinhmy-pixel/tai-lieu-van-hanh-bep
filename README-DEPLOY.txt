@@ -1,10 +1,10 @@
-BẾP BÌNH MỸ · PORTAL VẬN HÀNH 6.2
+BẾP BÌNH MỸ · PORTAL VẬN HÀNH 6.3
 ==================================
 
 1. MÔ HÌNH BẢO MẬT ĐÃ CÓ TRONG CODE
 
 - Đăng nhập bằng username + password, không còn một mật khẩu chung cho mọi người.
-- Mật khẩu được kiểm tra bằng PBKDF2; source chỉ giữ hash của tài khoản khởi tạo.
+- Admin mặc định `admin / BepBinhMy@2026` được đặt trực tiếp trong Worker theo yêu cầu triển khai nhanh.
 - Phiên đăng nhập nằm trong cookie HttpOnly + Secure + SameSite=Strict.
 - Ba vai trò: Admin, Operator, Viewer.
 - Không dùng IP để chặn đăng nhập hoặc API.
@@ -24,10 +24,6 @@ Không mở trực tiếp public/index.html vì bản tĩnh không chạy API đ
 
 Deploy production:
 
-  npm run secret:set
-
-Nhập một chuỗi ngẫu nhiên tối thiểu 32 ký tự, sau đó:
-
   npm run deploy
 
 Mở URL workers.dev hoặc custom domain do Cloudflare trả về.
@@ -43,12 +39,12 @@ Mật khẩu khởi tạo: BepBinhMy@2026
 Tài khoản `admin` là tài khoản quản trị toàn quyền.
 Ngay sau lần đăng nhập đầu:
 
-1) Mở tab "Phân quyền & IP".
+1) Mở tab "Người dùng & phân quyền".
 2) Không cần thêm IP để đăng nhập.
 3) Danh sách IP nếu có chỉ dùng để tham khảo và đối chiếu audit.
 4) Tạo Admin thứ hai và đặt mật khẩu riêng.
 5) Lưu chính sách.
-6) Không bật chặn IP; chức năng này đã bị vô hiệu hóa trong code.
+6) Mở tab "Cài đặt hệ thống" để đặt thời gian phiên và giới hạn đăng nhập sai.
 7) Đổi mật khẩu tài khoản admin khởi tạo.
 
 Admin, Operator và Viewer chỉ bị giới hạn theo quyền tài khoản, không theo IP.

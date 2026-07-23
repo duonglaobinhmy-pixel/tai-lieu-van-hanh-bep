@@ -28,7 +28,6 @@ class MemoryKv {
 const kv = new MemoryKv();
 const env = {
   BBM_DATA: kv,
-  SESSION_SECRET: "test-session-secret-that-is-long-and-random-123456789",
   ASSETS: {
     fetch: async () => new Response("<!doctype html><title>Portal</title>", {
       headers: { "content-type": "text/html; charset=utf-8" }

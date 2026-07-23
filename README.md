@@ -20,7 +20,8 @@ Tài khoản khởi tạo:
 - Username: `admin`
 - Password: `BepBinhMy@2026`
 
-Lệnh `npm run dev` dùng secret chỉ dành cho môi trường local.
+Admin mặc định và khóa ký phiên dự phòng đã nằm trong `worker.js`, nên chạy
+local hoặc deploy không cần tạo biến môi trường.
 
 ## Kiểm thử
 
@@ -37,13 +38,7 @@ npm run check
 npx wrangler login
 ```
 
-Đặt secret production tối thiểu 32 ký tự:
-
-```bash
-npm run secret:set
-```
-
-Sau đó deploy:
+Deploy:
 
 ```bash
 npm run deploy
@@ -56,9 +51,13 @@ chạy được API đăng nhập.
 
 - PBKDF2 cho mật khẩu.
 - Cookie `HttpOnly`, `Secure`, `SameSite=Strict`.
-- Phiên ký HMAC bằng `SESSION_SECRET`.
+- Phiên ký HMAC bằng khóa có sẵn trong Worker; có thể ghi đè bằng
+  `SESSION_SECRET` nếu sau này muốn tăng bảo mật.
 - RBAC được kiểm tra ở từng API.
 - IP không dùng để chặn; chỉ ghi audit để tránh khóa nhầm do IP động/VPN/IPv6.
 - Rate limit đăng nhập, CSP, HSTS và các security header.
 
 Xem thêm `README-DEPLOY.txt` và `SECURITY-ANALYSIS.md`.
+
+> Lưu ý: mật khẩu Admin hard-code phù hợp repository riêng tư. Không để
+> repository công khai vì người xem source sẽ thấy mật khẩu.
