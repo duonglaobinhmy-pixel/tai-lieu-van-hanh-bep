@@ -16,8 +16,11 @@ const DEFAULT_ADMIN = {
   salt: "IszD9jYnRgpxH_wEKHH-YQ",
   passwordHash: "pI7zb141_YSLg1rwQWICPa6fwhJS64YRLtk4h897y2A",
   iterations: PASSWORD_ITERATIONS,
-  notes: "Tài khoản khởi tạo. Đổi mật khẩu ngay sau khi cấu hình IP."
+  notes: "Tài khoản quản trị gốc: toàn quyền, không bị chặn theo IP nhưng vẫn ghi log IP."
 };
+
+const ROOT_ADMIN_ID = DEFAULT_ADMIN.id;
+const ROOT_ADMIN_USERNAME = DEFAULT_ADMIN.username;
 
 const ROLE_PERMISSIONS = {
   admin: [
@@ -335,7 +338,18 @@ function matchingIpRules(policy, ip, role = null) {
   });
 }
 
-function isRoleAllowedFromIp(policy, ip, role) {
+function isRootAdmin(user) {
+  return Boolean(
+    user &&
+    user.id === ROOT_ADMIN_ID &&
+    user.username === ROOT_ADMIN_USERNAME &&
+    user.role === "admin" &&
+    user.status === "active"
+  );
+}
+
+function isRoleAllowedFromIp(policy, ip, role, user = null) {
+  if (isRootAdmin(user)) return true;
   if (!policy.enforceIpAllowlist) return true;
   return matchingIpRules(policy, ip, role).length > 0;
 }
@@ -355,7 +369,7 @@ async function authorize(request, env, requiredPermission = "document:read") {
   if (!user || user.status !== "active" || user.role !== payload.role) {
     return { ok: false, status: 401, error: "SESSION_REVOKED", context, policy };
   }
-  if (!isRoleAllowedFromIp(policy, context.ip, user.role)) {
+  if (!isRoleAllowedFromIp(policy, context.ip, user.role, user)) {
     return { ok: false, status: 403, error: "IP_NOT_ALLOWED", context, policy, user };
   }
   if (!hasPermission(user, requiredPermission)) {
@@ -510,7 +524,7 @@ async function handleLogin(request, env) {
     return json({ error: "INVALID_CREDENTIALS" }, 401);
   }
 
-  if (!isRoleAllowedFromIp(policy, context.ip, user.role)) {
+  if (!isRoleAllowedFromIp(policy, context.ip, user.role, user)) {
     await writeAudit(env, {
       event: "LOGIN_BLOCKED_IP",
       result: "denied",
@@ -530,7 +544,9 @@ async function handleLogin(request, env) {
     username: user.username,
     role: user.role,
     context,
-    detail: policy.enforceIpAllowlist ? "IP allowlist enforced" : "Audit-only IP mode"
+    detail: isRootAdmin(user)
+      ? "Root Admin bypassed IP allowlist; source IP still audited"
+      : policy.enforceIpAllowlist ? "IP allowlist enforced" : "Audit-only IP mode"
   });
 
   return json({
@@ -542,7 +558,8 @@ async function handleLogin(request, env) {
     },
     expiresIn: ttl,
     clientIp: context.ip,
-    ipEnforced: Boolean(policy.enforceIpAllowlist)
+    ipEnforced: Boolean(policy.enforceIpAllowlist && !isRootAdmin(user)),
+    ipBypass: isRootAdmin(user)
   }, 200, { "set-cookie": sessionCookie(token, ttl) });
 }
 
@@ -574,7 +591,8 @@ async function handleSession(request, env) {
     },
     permissions: ROLE_PERMISSIONS[auth.user.role] || [],
     clientIp: auth.context.ip,
-    ipEnforced: Boolean(auth.policy.enforceIpAllowlist),
+    ipEnforced: Boolean(auth.policy.enforceIpAllowlist && !isRootAdmin(auth.user)),
+    ipBypass: isRootAdmin(auth.user),
     matchedIpRules: matchingIpRules(auth.policy, auth.context.ip, auth.user.role).map((rule) => rule.label),
     expiresAt: new Date(Number(auth.payload.exp) * 1000).toISOString()
   });
@@ -701,10 +719,11 @@ async function buildUpdatedUsers(incomingUsers, currentUsers, currentUsername) {
   for (const candidate of incomingUsers) {
     const id = cleanString(candidate.id, 80) || `usr_${crypto.randomUUID()}`;
     const existing = currentById.get(id);
-    const username = normalizeUsername(candidate.username);
+    const rootAdmin = id === ROOT_ADMIN_ID;
+    const username = rootAdmin ? ROOT_ADMIN_USERNAME : normalizeUsername(candidate.username);
     const displayName = cleanString(candidate.displayName, 120);
-    const role = cleanString(candidate.role, 20);
-    const status = cleanString(candidate.status, 20);
+    const role = rootAdmin ? "admin" : cleanString(candidate.role, 20);
+    const status = rootAdmin ? "active" : cleanString(candidate.status, 20);
 
     if (!/^[a-z0-9._-]{3,40}$/.test(username)) throw new Error("INVALID_USERNAME");
     if (usernames.has(username)) throw new Error("DUPLICATE_USERNAME");
@@ -736,6 +755,9 @@ async function buildUpdatedUsers(incomingUsers, currentUsers, currentUsername) {
     });
   }
 
+  if (!updated.some((user) => user.id === ROOT_ADMIN_ID && isRootAdmin(user))) {
+    throw new Error("ROOT_ADMIN_REQUIRED");
+  }
   if (!updated.some((user) => user.role === "admin" && user.status === "active")) {
     throw new Error("ACTIVE_ADMIN_REQUIRED");
   }
@@ -795,7 +817,7 @@ async function handleSecurity(request, env) {
         updatedBy: auth.user.username
       };
 
-      if (enforceIpAllowlist && !isRoleAllowedFromIp(candidatePolicy, auth.context.ip, currentUser.role)) {
+      if (enforceIpAllowlist && !isRoleAllowedFromIp(candidatePolicy, auth.context.ip, currentUser.role, currentUser)) {
         return json({
           error: "CURRENT_IP_NOT_ALLOWED",
           currentIp: auth.context.ip

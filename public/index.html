@@ -21,7 +21,7 @@
       <div class="login-card">
         <div class="security-badge">🔒 Khu vực nội bộ</div>
         <h2>Đăng nhập tài liệu</h2>
-        <p>Đăng nhập bằng tài khoản được cấp. Hệ thống kiểm tra cả vai trò và IP truy cập.</p>
+        <p>Đăng nhập bằng tài khoản được cấp. Admin gốc có toàn quyền và không bị chặn theo IP; mọi IP vẫn được ghi log.</p>
         <label class="field-label" for="portalUsername">Tên đăng nhập</label>
         <input id="portalUsername" type="text" autocomplete="username" value="admin" placeholder="Tên đăng nhập">
         <label class="field-label" for="portalPassword">Mật khẩu truy cập</label>
@@ -32,7 +32,7 @@
         <button id="loginButton" class="button button-primary button-block">Mở tài liệu</button>
         <div id="loginMessage" class="login-message"></div>
         <div class="login-footnote">
-          Phiên đăng nhập dùng cookie bảo mật, tự hết hạn và được ghi vào nhật ký IP.
+          Phiên đăng nhập dùng cookie bảo mật, tự hết hạn và mọi IP truy cập đều được ghi nhật ký.
         </div>
       </div>
     </div>
@@ -461,7 +461,7 @@
 
         <h3 class="subheading">User nào được vào và được làm gì</h3>
         <div class="role-matrix">
-          <article><strong>Admin</strong><span>Toàn quyền tài liệu, link, tài khoản, user, IP và audit log.</span></article>
+          <article><strong>Admin gốc</strong><span>Toàn quyền tài liệu, link, tài khoản, user, IP và audit log; luôn được vào không phụ thuộc IP.</span></article>
           <article><strong>Operator</strong><span>Đọc tài liệu, mở web vận hành, cập nhật checklist và nhật ký thay đổi.</span></article>
           <article><strong>Viewer</strong><span>Chỉ đọc; không thấy kho tài khoản, chính sách IP hoặc log truy cập.</span></article>
         </div>

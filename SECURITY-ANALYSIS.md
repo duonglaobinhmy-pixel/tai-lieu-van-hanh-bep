@@ -35,7 +35,8 @@ Việc ẩn nút trong giao diện chỉ là lớp UX. Quyết định cho phép
 
 | Role | Đọc tài liệu | Mở web vận hành | Sửa checklist/log thay đổi | Xem kho tài khoản | Quản lý user/IP | Xem audit |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Admin | Có | Có | Có | Có | Có | Có |
+| Admin gốc (`admin`) | Có | Có | Có | Có | Có | Có; bỏ qua chặn IP, vẫn ghi log |
+| Admin phụ | Có | Có | Có | Có | Có | Có; chịu IP policy khi bật |
 | Operator | Có | Có | Có | Không | Không | Không |
 | Viewer | Có | Không | Không | Không | Không | Không |
 
@@ -67,11 +68,12 @@ Quyền được kiểm tra ở hai nơi:
 Cloudflare nhìn thấy IP Internet công cộng qua `CF-Connecting-IP`, không nhìn
 thấy IP LAN của máy người dùng.
 
-### Cơ chế chống tự khóa
+### Tài khoản khôi phục không phụ thuộc IP
 
-Khi Admin bật `enforceIpAllowlist`, server dựng chính sách mới trước nhưng chưa
-lưu. Nếu IP hiện tại không khớp ít nhất một rule dành cho Admin, API trả
-`CURRENT_IP_NOT_ALLOWED` và giữ chế độ cũ.
+Tài khoản có đồng thời ID `usr_admin`, username `admin`, role `admin` và trạng
+thái active được hard-code làm tài khoản khôi phục. Tài khoản này luôn bỏ qua
+IP allowlist nhưng mọi lần đăng nhập và thao tác vẫn ghi IP vào audit. Admin
+phụ, Operator và Viewer tiếp tục bị đối chiếu IP/CIDR khi bật cưỡng chế.
 
 ## 5. Nhật ký truy cập IP
 

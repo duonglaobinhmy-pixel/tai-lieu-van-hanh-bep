@@ -127,7 +127,7 @@ function loginErrorMessage(error) {
 }
 
 async function login() {
-  loginMessage.textContent = "Đang xác thực tài khoản và IP...";
+  loginMessage.textContent = "Đang xác thực tài khoản...";
   try {
     const result = await apiFetch(API_LOGIN, {
       method: "POST",

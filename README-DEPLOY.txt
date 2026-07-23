@@ -1,4 +1,4 @@
-BẾP BÌNH MỸ · PORTAL VẬN HÀNH 6.1
+BẾP BÌNH MỸ · PORTAL VẬN HÀNH 6.2
 ==================================
 
 1. MÔ HÌNH BẢO MẬT ĐÃ CÓ TRONG CODE
@@ -8,6 +8,7 @@ BẾP BÌNH MỸ · PORTAL VẬN HÀNH 6.1
 - Phiên đăng nhập nằm trong cookie HttpOnly + Secure + SameSite=Strict.
 - Ba vai trò: Admin, Operator, Viewer.
 - IP Allowlist gắn theo vai trò và chặn ở Worker/API, không chỉ ẩn nút trên giao diện.
+- Admin gốc `admin` luôn toàn quyền và bỏ qua IP allowlist để không bị tự khóa; IP vẫn được ghi audit.
 - Audit log lưu: thời gian, user, role, IP, kết quả, thiết bị, quốc gia và lý do bị chặn.
 - Khóa tạm khi nhập sai quá số lần quy định.
 - Security headers: CSP, HSTS, chống iframe, chống MIME sniffing.
@@ -32,18 +33,19 @@ Cloudflare khác, phải tạo KV mới và thay đúng namespace ID.
 Username: admin
 Mật khẩu khởi tạo: BepBinhMy@2026
 
+Tài khoản `admin` là tài khoản khôi phục toàn quyền, không bị chặn theo IP.
 Ngay sau lần đăng nhập đầu:
 
 1) Mở tab "Phân quyền & IP".
-2) Bấm "+ Thêm IP hiện tại".
-3) Thêm ít nhất một IP dự phòng là IP đầu ra VPN kỹ thuật.
+2) Chỉ thêm IP nếu muốn giới hạn Admin phụ, Operator hoặc Viewer.
+3) Có thể thêm IP dự phòng là IP đầu ra VPN kỹ thuật.
 4) Tạo Admin thứ hai và đặt mật khẩu riêng.
 5) Lưu chính sách.
-6) Bật "Chặn IP ngoài danh sách" và lưu lại.
+6) Bật "Chặn IP ngoài danh sách" cho các tài khoản thường và lưu lại.
 7) Đổi mật khẩu tài khoản admin khởi tạo.
 
-Worker không cho bật chặn nếu IP hiện tại chưa được cấp cho Admin, tránh tự
-khóa người cấu hình.
+Admin gốc `admin` luôn là đường khôi phục. Admin phụ, Operator và Viewer vẫn
+tuân theo rule IP khi bật cưỡng chế.
 
 4. IP NÀO ĐƯỢC PHÉP
 
@@ -67,7 +69,8 @@ truyền dùng IP động, ưu tiên VPN có IP đầu ra cố định trước 
 
 5. PHÂN QUYỀN
 
-- Admin: toàn quyền tài liệu, link hệ thống, user, IP và audit log.
+- Admin gốc: toàn quyền tài liệu, link hệ thống, user, IP và audit log; bỏ qua chặn IP.
+- Admin phụ: toàn quyền nhưng vẫn chịu IP policy khi bật.
 - Operator: đọc tài liệu, mở web vận hành, cập nhật checklist/nhật ký.
 - Viewer: chỉ đọc; không thấy tài khoản, user, IP hoặc log.
 

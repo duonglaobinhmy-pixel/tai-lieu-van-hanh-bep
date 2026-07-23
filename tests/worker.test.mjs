@@ -167,14 +167,33 @@ test("admin can configure role-based users and IP rules", async () => {
   assert.equal(saved.data.policy.users[1].passwordHash, undefined);
 });
 
-test("server blocks a valid password from an unauthorized IP", async () => {
-  const blocked = await call("/api/login", {
+test("root admin has full access from any IP while the source IP is audited", async () => {
+  const login = await call("/api/login", {
     method: "POST",
     ip: "203.0.113.99",
     body: { username: "admin", password: "BepBinhMy@2026" }
   });
-  assert.equal(blocked.response.status, 403);
-  assert.equal(blocked.data.error, "IP_NOT_ALLOWED");
+  assert.equal(login.response.status, 200);
+  assert.equal(login.data.user.role, "admin");
+  assert.equal(login.data.ipBypass, true);
+  assert.equal(login.data.ipEnforced, false);
+
+  const cookie = cookieFrom(login.response);
+  const session = await call("/api/session", {
+    ip: "198.51.100.45",
+    cookie
+  });
+  assert.equal(session.response.status, 200);
+  assert.equal(session.data.ipBypass, true);
+  assert.equal(session.data.clientIp, "198.51.100.45");
+
+  const blockedOperator = await call("/api/login", {
+    method: "POST",
+    ip: "203.0.113.99",
+    body: { username: "operator.bep", password: "Operator@BinhMy2026" }
+  });
+  assert.equal(blockedOperator.response.status, 403);
+  assert.equal(blockedOperator.data.error, "IP_NOT_ALLOWED");
 });
 
 test("operator can use state but cannot manage security", async () => {
