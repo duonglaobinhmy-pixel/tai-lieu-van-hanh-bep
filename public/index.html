@@ -21,7 +21,7 @@
       <div class="login-card">
         <div class="security-badge">🔒 Khu vực nội bộ</div>
         <h2>Đăng nhập tài liệu</h2>
-        <p>Đăng nhập bằng tài khoản được cấp. Admin gốc có toàn quyền và không bị chặn theo IP; mọi IP vẫn được ghi log.</p>
+        <p>Đăng nhập bằng tài khoản được cấp. Hệ thống không chặn theo IP; mọi IP vẫn được ghi log để truy vết.</p>
         <label class="field-label" for="portalUsername">Tên đăng nhập</label>
         <input id="portalUsername" type="text" autocomplete="username" value="admin" placeholder="Tên đăng nhập">
         <label class="field-label" for="portalPassword">Mật khẩu truy cập</label>
@@ -451,8 +451,8 @@
 
         <div class="security-control-grid">
           <label class="security-toggle">
-            <input id="enforceIpAllowlist" type="checkbox">
-            <span><strong>Bật chặn IP ngoài danh sách</strong><small>Server từ chối trước khi mở tài liệu và trước mọi API.</small></span>
+            <input id="enforceIpAllowlist" type="checkbox" disabled>
+            <span><strong>Chặn IP đã tắt</strong><small>IP chỉ được ghi vào audit log, không dùng để từ chối tài khoản hợp lệ.</small></span>
           </label>
           <label>Thời gian phiên (phút)<input id="sessionTtlMinutes" type="number" min="15" max="720" value="240"></label>
           <label>Số lần sai tối đa<input id="maxLoginAttempts" type="number" min="3" max="10" value="5"></label>

@@ -162,12 +162,12 @@ test("admin can configure role-based users and IP rules", async () => {
     }
   });
   assert.equal(saved.response.status, 200);
-  assert.equal(saved.data.policy.enforceIpAllowlist, true);
+  assert.equal(saved.data.policy.enforceIpAllowlist, false);
   assert.equal(saved.data.policy.users.length, 3);
   assert.equal(saved.data.policy.users[1].passwordHash, undefined);
 });
 
-test("root admin has full access from any IP while the source IP is audited", async () => {
+test("all valid accounts can access from any IP while source IP is audited", async () => {
   const login = await call("/api/login", {
     method: "POST",
     ip: "203.0.113.99",
@@ -187,13 +187,14 @@ test("root admin has full access from any IP while the source IP is audited", as
   assert.equal(session.data.ipBypass, true);
   assert.equal(session.data.clientIp, "198.51.100.45");
 
-  const blockedOperator = await call("/api/login", {
+  const operator = await call("/api/login", {
     method: "POST",
     ip: "203.0.113.99",
     body: { username: "operator.bep", password: "Operator@BinhMy2026" }
   });
-  assert.equal(blockedOperator.response.status, 403);
-  assert.equal(blockedOperator.data.error, "IP_NOT_ALLOWED");
+  assert.equal(operator.response.status, 200);
+  assert.equal(operator.data.user.role, "operator");
+  assert.equal(operator.data.ipEnforced, false);
 });
 
 test("operator can use state but cannot manage security", async () => {
@@ -248,11 +249,11 @@ test("viewer is read-only and sensitive sections are omitted server-side", async
   assert.equal(update.response.status, 403);
 });
 
-test("admin audit endpoint contains allowed and denied IP events", async () => {
+test("admin audit endpoint contains access IP events", async () => {
   const audit = await call("/api/audit?limit=100", { cookie: globalThis.adminCookie });
   assert.equal(audit.response.status, 200);
   assert.ok(audit.data.entries.some((entry) => entry.event === "LOGIN_SUCCEEDED"));
   assert.ok(audit.data.entries.some((entry) => entry.event === "LOGIN_FAILED"));
-  assert.ok(audit.data.entries.some((entry) => entry.event === "LOGIN_BLOCKED_IP"));
+  assert.ok(audit.data.entries.some((entry) => entry.event === "LOGIN_SUCCEEDED"));
   assert.ok(audit.data.entries.some((entry) => entry.ip === "203.0.113.99"));
 });

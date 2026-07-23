@@ -7,8 +7,8 @@ BẾP BÌNH MỸ · PORTAL VẬN HÀNH 6.2
 - Mật khẩu được kiểm tra bằng PBKDF2; source chỉ giữ hash của tài khoản khởi tạo.
 - Phiên đăng nhập nằm trong cookie HttpOnly + Secure + SameSite=Strict.
 - Ba vai trò: Admin, Operator, Viewer.
-- IP Allowlist gắn theo vai trò và chặn ở Worker/API, không chỉ ẩn nút trên giao diện.
-- Admin gốc `admin` luôn toàn quyền và bỏ qua IP allowlist để không bị tự khóa; IP vẫn được ghi audit.
+- Không dùng IP để chặn đăng nhập hoặc API.
+- Mọi tài khoản hợp lệ được xác thực bằng username, password và phân quyền; IP chỉ được ghi audit.
 - Audit log lưu: thời gian, user, role, IP, kết quả, thiết bị, quốc gia và lý do bị chặn.
 - Khóa tạm khi nhập sai quá số lần quy định.
 - Security headers: CSP, HSTS, chống iframe, chống MIME sniffing.
@@ -33,19 +33,18 @@ Cloudflare khác, phải tạo KV mới và thay đúng namespace ID.
 Username: admin
 Mật khẩu khởi tạo: BepBinhMy@2026
 
-Tài khoản `admin` là tài khoản khôi phục toàn quyền, không bị chặn theo IP.
+Tài khoản `admin` là tài khoản quản trị toàn quyền.
 Ngay sau lần đăng nhập đầu:
 
 1) Mở tab "Phân quyền & IP".
-2) Chỉ thêm IP nếu muốn giới hạn Admin phụ, Operator hoặc Viewer.
-3) Có thể thêm IP dự phòng là IP đầu ra VPN kỹ thuật.
+2) Không cần thêm IP để đăng nhập.
+3) Danh sách IP nếu có chỉ dùng để tham khảo và đối chiếu audit.
 4) Tạo Admin thứ hai và đặt mật khẩu riêng.
 5) Lưu chính sách.
-6) Bật "Chặn IP ngoài danh sách" cho các tài khoản thường và lưu lại.
+6) Không bật chặn IP; chức năng này đã bị vô hiệu hóa trong code.
 7) Đổi mật khẩu tài khoản admin khởi tạo.
 
-Admin gốc `admin` luôn là đường khôi phục. Admin phụ, Operator và Viewer vẫn
-tuân theo rule IP khi bật cưỡng chế.
+Admin, Operator và Viewer chỉ bị giới hạn theo quyền tài khoản, không theo IP.
 
 4. IP NÀO ĐƯỢC PHÉP
 

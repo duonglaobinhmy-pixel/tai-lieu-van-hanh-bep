@@ -45,7 +45,11 @@ Quyền được kiểm tra ở hai nơi:
 1. `public/app.js`: ẩn/khóa giao diện không liên quan.
 2. `worker.js`: bắt buộc permission ở từng endpoint.
 
-## 4. IP nào được phép vào
+## 4. IP chỉ dùng để ghi log
+
+Hệ thống không dùng IP để chặn đăng nhập hoặc API. Lý do là IP động, VPN,
+proxy và IPv6 có thể làm tài khoản hợp lệ bị khóa nhầm. Worker vẫn ghi IP,
+thiết bị, vị trí Cloudflare và thời gian vào audit để truy vết.
 
 ### Nên cấp
 
@@ -68,12 +72,12 @@ Quyền được kiểm tra ở hai nơi:
 Cloudflare nhìn thấy IP Internet công cộng qua `CF-Connecting-IP`, không nhìn
 thấy IP LAN của máy người dùng.
 
-### Tài khoản khôi phục không phụ thuộc IP
+### Không cưỡng chế IP
 
-Tài khoản có đồng thời ID `usr_admin`, username `admin`, role `admin` và trạng
-thái active được hard-code làm tài khoản khôi phục. Tài khoản này luôn bỏ qua
-IP allowlist nhưng mọi lần đăng nhập và thao tác vẫn ghi IP vào audit. Admin
-phụ, Operator và Viewer tiếp tục bị đối chiếu IP/CIDR khi bật cưỡng chế.
+Hàm kiểm tra IP luôn cho qua tài khoản đã xác thực đúng. Endpoint cập nhật
+chính sách cũng ép `enforceIpAllowlist=false`, vì vậy giao diện hoặc request
+API không thể vô tình bật lại chặn IP. Phân quyền Admin/Operator/Viewer vẫn
+được kiểm tra phía server ở từng endpoint.
 
 ## 5. Nhật ký truy cập IP
 

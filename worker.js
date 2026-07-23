@@ -349,9 +349,9 @@ function isRootAdmin(user) {
 }
 
 function isRoleAllowedFromIp(policy, ip, role, user = null) {
-  if (isRootAdmin(user)) return true;
-  if (!policy.enforceIpAllowlist) return true;
-  return matchingIpRules(policy, ip, role).length > 0;
+  // IP chỉ dùng để ghi audit. Không chặn đăng nhập/API vì IP động, proxy,
+  // VPN và IPv6 có thể làm người dùng hợp lệ bị khóa nhầm.
+  return true;
 }
 
 function hasPermission(user, permission) {
@@ -802,7 +802,9 @@ async function handleSecurity(request, env) {
       const incoming = await request.json();
       const users = await buildUpdatedUsers(incoming.users, auth.policy.users, auth.user.username);
       const ipRules = buildUpdatedIpRules(incoming.ipRules);
-      const enforceIpAllowlist = Boolean(incoming.enforceIpAllowlist);
+      // Cưỡng chế IP đã tắt hoàn toàn. Vẫn giữ danh sách rule để tham khảo
+      // và vẫn ghi IP thật vào audit log.
+      const enforceIpAllowlist = false;
       const currentUser = users.find((user) => user.id === auth.user.id);
       const candidatePolicy = {
         ...auth.policy,
