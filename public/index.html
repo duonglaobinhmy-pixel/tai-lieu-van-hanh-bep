@@ -21,7 +21,9 @@
       <div class="login-card">
         <div class="security-badge">🔒 Khu vực nội bộ</div>
         <h2>Đăng nhập tài liệu</h2>
-        <p>Nhập mật khẩu bàn giao để truy cập toàn bộ project.</p>
+        <p>Đăng nhập bằng tài khoản được cấp. Hệ thống kiểm tra cả vai trò và IP truy cập.</p>
+        <label class="field-label" for="portalUsername">Tên đăng nhập</label>
+        <input id="portalUsername" type="text" autocomplete="username" value="admin" placeholder="Tên đăng nhập">
         <label class="field-label" for="portalPassword">Mật khẩu truy cập</label>
         <div class="password-row">
           <input id="portalPassword" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu đặc biệt">
@@ -30,7 +32,7 @@
         <button id="loginButton" class="button button-primary button-block">Mở tài liệu</button>
         <div id="loginMessage" class="login-message"></div>
         <div class="login-footnote">
-          Phiên đăng nhập được ghi nhớ trên trình duyệt hiện tại.
+          Phiên đăng nhập dùng cookie bảo mật, tự hết hạn và được ghi vào nhật ký IP.
         </div>
       </div>
     </div>
@@ -50,7 +52,7 @@
         <span class="status-dot"></span>
         <div>
           <strong>Hệ thống vận hành</strong>
-          <small>Phiên bản tài liệu 5.0 · Cloud Sync</small>
+          <small>Phiên bản tài liệu 6.1 · Security Layer</small>
         </div>
       </div>
 
@@ -59,6 +61,7 @@
       </div>
 
       <nav class="sidebar-nav">
+        <a id="operationLaunchNav" class="nav-external" href="/" target="_blank" rel="noopener noreferrer" data-permission="system:open"><span>↗</span> Mở web vận hành</a>
         <a href="#dashboard" class="active"><span>01</span> Tổng quan</a>
         <a href="#scope"><span>02</span> Phạm vi & mục tiêu</a>
         <a href="#architecture"><span>03</span> Kiến trúc hệ thống</a>
@@ -70,8 +73,10 @@
         <a href="#security"><span>09</span> Bảo mật & backup</a>
         <a href="#raci"><span>10</span> RACI & trách nhiệm</a>
         <a href="#acceptance"><span>11</span> Nghiệm thu bàn giao</a>
-        <a href="#accounts"><span>12</span> Tài khoản & liên kết</a>
-        <a href="#change-log"><span>13</span> Nhật ký thay đổi</a>
+        <a href="#accounts" data-role="admin"><span>12</span> Tài khoản & liên kết</a>
+        <a href="#access-control" data-role="admin"><span>13</span> Phân quyền & IP</a>
+        <a href="#audit-log" data-role="admin"><span>14</span> Log truy cập IP</a>
+        <a href="#change-log"><span>15</span> Nhật ký thay đổi</a>
       </nav>
 
       <div class="sidebar-footer">
@@ -88,8 +93,10 @@
           <h1>Hệ thống tự động hóa Bếp Bình Mỹ</h1>
         </div>
         <div class="topbar-actions">
+          <div class="meta-pill"><span>Đang đăng nhập</span><strong id="currentUserLabel">—</strong></div>
+          <div class="meta-pill"><span>IP hiện tại</span><strong id="currentIpLabel">—</strong></div>
           <div class="meta-pill"><span>Owner</span><strong>Ban AI / Bếp Bình Mỹ</strong></div>
-          <div class="meta-pill"><span>Version</span><strong>5.0</strong></div>
+          <div class="meta-pill"><span>Version</span><strong>6.1</strong></div>
         </div>
       </header>
 
@@ -100,7 +107,8 @@
           <p>Project tài liệu này là nguồn tham chiếu chính thức cho đội vận hành, Bếp, Kho, Kế toán và kỹ thuật khi tiếp quản hệ thống.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="#operations">Xem SOP vận hành</a>
-            <a class="button button-secondary" href="#accounts">Mở kho tài khoản</a>
+            <a id="operationHeroLink" class="button button-secondary" href="/" target="_blank" rel="noopener noreferrer" data-permission="system:open">Mở web đăng nhập ↗</a>
+            <a class="button button-secondary" href="#accounts" data-role="admin">Mở kho tài khoản</a>
           </div>
         </div>
         <div class="hero-summary">
@@ -281,6 +289,15 @@
           <div class="timeline-item"><span>05</span><div><h3>Chạy xuất kho</h3><p>Xác nhận không trùng dòng, không cộng dồn sai và có đủ mã nguyên liệu.</p><small>Owner: Kho</small></div></div>
           <div class="timeline-item"><span>06</span><div><h3>Đối soát & chốt</h3><p>Bếp, Kho và Kế toán xác nhận đầu ra trước thời điểm sản xuất/mua hàng.</p><small>Owner: Quản lý vận hành</small></div></div>
         </div>
+        <div class="operation-launch-card" data-permission="system:open">
+          <div>
+            <span class="section-kicker">Operations Access</span>
+            <h3>Mở trang đăng nhập hệ thống vận hành</h3>
+            <p>Link được quản trị tại mục bàn giao, luôn mở trong tab mới. Người dùng vẫn phải qua tài khoản, vai trò và IP được cấp.</p>
+            <code id="systemLoginUrlDisplay">Chưa cấu hình — đang dùng link của portal này</code>
+          </div>
+          <a id="operationSopLink" class="button button-primary" href="/" target="_blank" rel="noopener noreferrer">Mở web đăng nhập ↗</a>
+        </div>
         <div class="checklist-panel">
           <h3>Checklist cuối ca</h3>
           <label><input type="checkbox"> Báo cơm đầy đủ và hợp lệ</label>
@@ -331,13 +348,14 @@
           <div><span class="section-kicker">Security & Continuity</span><h2>Bảo mật, backup và khôi phục</h2></div>
         </div>
         <div class="security-flow">
-          <div>Thiết bị được phép</div><span>→</span><div>Cloudflare / VPN</div><span>→</span><div>Firewall</div><span>→</span><div>Nginx HTTPS</div><span>→</span><div>n8n</div>
+          <div>IP được phép</div><span>→</span><div>Tài khoản + vai trò</div><span>→</span><div>Cookie bảo mật</div><span>→</span><div>Portal</div><span>→</span><div>n8n / PWA</div>
         </div>
         <div class="content-grid three">
-          <article class="content-card"><h3>Access Control</h3><p>Không public cổng 5678. SSH chỉ qua key, IP quản trị hoặc VPN.</p></article>
-          <article class="content-card"><h3>Credential</h3><p>Không hardcode mật khẩu trong workflow. Tài khoản được lưu tại kho riêng của portal.</p></article>
-          <article class="content-card"><h3>Backup</h3><p>Export workflow sau mỗi thay đổi; lưu bản ngoài VPS và kiểm thử restore định kỳ.</p></article>
+          <article class="content-card"><h3>IP Allowlist thật</h3><p>Worker đọc IP gốc từ Cloudflare, đối chiếu CIDR và vai trò trước khi cho đăng nhập hoặc dùng API.</p></article>
+          <article class="content-card"><h3>RBAC 3 tầng</h3><p>Admin quản trị; Operator vận hành và cập nhật checklist; Viewer chỉ đọc tài liệu.</p></article>
+          <article class="content-card"><h3>Audit Log</h3><p>Lưu đăng nhập đúng/sai, IP bị chặn, thiết bị, quốc gia, thời gian và thao tác thay đổi chính sách.</p></article>
         </div>
+        <div class="callout warning"><strong>IP nào nên được cấp:</strong> IP tĩnh văn phòng quản trị, IP đầu ra VPN kỹ thuật, IP tĩnh mạng Bếp cho Operator, và IP khẩn cấp có ngày hết hạn. Không cấp <code>0.0.0.0/0</code>; không nhập IP nội bộ 192.168.x.x vì Cloudflare nhìn thấy IP Internet công cộng.</div>
       </section>
 
       <section id="raci" class="section searchable">
@@ -381,7 +399,7 @@
         </div>
       </section>
 
-      <section id="accounts" class="section searchable">
+      <section id="accounts" class="section searchable" data-role="admin">
         <div class="section-header">
           <div><span class="section-kicker">Credential Register</span><h2>Tài khoản và đường dẫn hệ thống</h2></div>
           <div class="section-actions">
@@ -395,10 +413,10 @@
       <div><span id="syncDot" class="sync-dot"></span><strong id="syncStatus">Đang kết nối Cloudflare...</strong></div>
       <small id="syncTime">Chưa đồng bộ</small>
     </div>
-    <div class="callout info"><strong>Dành cho bàn giao nội bộ:</strong> nhập đầy đủ link, tài khoản, mật khẩu, owner và ghi chú. Bấm <strong>Lưu lên Cloudflare</strong> để mọi thiết bị dùng chung dữ liệu.</div>
+    <div class="callout info"><strong>Không lưu mật khẩu thật ở đây:</strong> cột Secret chỉ ghi vị trí cất giữ, ví dụ “Cloudflare Secret”, “Password Manager” hoặc tên vault. Quyền xem và sửa mục này chỉ dành cho Admin.</div>
         <div class="table-shell wide">
           <table class="account-table">
-            <thead><tr><th>Hệ thống</th><th>Đường dẫn / IP</th><th>Tài khoản</th><th>Mật khẩu / Secret</th><th>Vai trò</th><th>Owner</th><th>Ghi chú</th><th></th></tr></thead>
+            <thead><tr><th>Hệ thống</th><th>Đường dẫn / IP</th><th>Tài khoản</th><th>Vị trí lưu Secret</th><th>Vai trò</th><th>Owner</th><th>Ghi chú</th><th></th></tr></thead>
             <tbody id="accountRows"></tbody>
           </table>
         </div>
@@ -409,17 +427,85 @@
             <label>Người bàn giao<input id="handoverFrom"></label>
             <label>Người tiếp nhận<input id="handoverTo"></label>
             <label>Ngày bàn giao<input id="handoverDate" type="date"></label>
-            <label>Phiên bản workflow<input id="workflowVersion" value="5.0"></label>
+            <label>Phiên bản workflow<input id="workflowVersion" value="6.1"></label>
             <label>Vị trí backup<input id="backupLocation"></label>
             <label>Kênh hỗ trợ<input id="supportChannel"></label>
+            <label>Link web vận hành / đăng nhập<input id="operationPortalUrl" type="url" placeholder="https://..."></label>
           </div>
         </div>
+      </section>
+
+      <section id="access-control" class="section searchable" data-role="admin">
+        <div class="section-header">
+          <div><span class="section-kicker">Access Governance</span><h2>Phân quyền người dùng và IP được phép</h2></div>
+          <div class="section-actions">
+            <button id="addUser" class="button button-secondary" type="button">+ Thêm user</button>
+            <button id="addCurrentIp" class="button button-secondary" type="button">+ Thêm IP hiện tại</button>
+            <button id="saveSecurity" class="button button-primary" type="button">Lưu chính sách bảo mật</button>
+          </div>
+        </div>
+
+        <div id="securityWarning" class="callout warning">
+          <strong>Chế độ an toàn khi cài đặt:</strong> IP đang được ghi log nhưng chưa chặn. Hãy thêm ít nhất IP hiện tại, một IP dự phòng/VPN, rồi mới bật cưỡng chế.
+        </div>
+
+        <div class="security-control-grid">
+          <label class="security-toggle">
+            <input id="enforceIpAllowlist" type="checkbox">
+            <span><strong>Bật chặn IP ngoài danh sách</strong><small>Server từ chối trước khi mở tài liệu và trước mọi API.</small></span>
+          </label>
+          <label>Thời gian phiên (phút)<input id="sessionTtlMinutes" type="number" min="15" max="720" value="240"></label>
+          <label>Số lần sai tối đa<input id="maxLoginAttempts" type="number" min="3" max="10" value="5"></label>
+          <label>Cửa sổ khóa (phút)<input id="loginWindowMinutes" type="number" min="5" max="60" value="15"></label>
+        </div>
+
+        <h3 class="subheading">User nào được vào và được làm gì</h3>
+        <div class="role-matrix">
+          <article><strong>Admin</strong><span>Toàn quyền tài liệu, link, tài khoản, user, IP và audit log.</span></article>
+          <article><strong>Operator</strong><span>Đọc tài liệu, mở web vận hành, cập nhật checklist và nhật ký thay đổi.</span></article>
+          <article><strong>Viewer</strong><span>Chỉ đọc; không thấy kho tài khoản, chính sách IP hoặc log truy cập.</span></article>
+        </div>
+        <div class="table-shell wide security-table-shell">
+          <table>
+            <thead><tr><th>Tên hiển thị</th><th>Username</th><th>Vai trò</th><th>Trạng thái</th><th>Mật khẩu mới</th><th>Ghi chú</th><th></th></tr></thead>
+            <tbody id="securityUserRows"></tbody>
+          </table>
+        </div>
+
+        <h3 class="subheading">IP / CIDR được phép</h3>
+        <p class="legend">IPv4 dùng <code>x.x.x.x/32</code> cho một IP hoặc CIDR hẹp. IPv6 hiện dùng địa chỉ chính xác. Mỗi rule gắn trực tiếp với vai trò được phép.</p>
+        <div class="table-shell wide security-table-shell">
+          <table>
+            <thead><tr><th>Tên IP</th><th>IP / CIDR</th><th>Vai trò được phép</th><th>Bật</th><th>Hết hạn</th><th>Ghi chú</th><th></th></tr></thead>
+            <tbody id="ipRuleRows"></tbody>
+          </table>
+        </div>
+        <div id="securityMessage" class="form-message"></div>
+      </section>
+
+      <section id="audit-log" class="section searchable" data-role="admin">
+        <div class="section-header">
+          <div><span class="section-kicker">Security Audit</span><h2>Nhật ký ai đã vào và vào từ IP nào</h2></div>
+          <button id="refreshAudit" class="button button-secondary" type="button">Làm mới log</button>
+        </div>
+        <div class="audit-summary">
+          <span>Giữ log 90 ngày</span>
+          <span>Không ghi mật khẩu</span>
+          <span>Admin mới được xem</span>
+        </div>
+        <div class="table-shell wide">
+          <table>
+            <thead><tr><th>Thời gian</th><th>Sự kiện</th><th>Kết quả</th><th>User / Role</th><th>IP</th><th>Vị trí</th><th>Thiết bị</th><th>Lý do / Chi tiết</th></tr></thead>
+            <tbody id="auditRows"></tbody>
+          </table>
+        </div>
+        <div id="auditMessage" class="form-message"></div>
       </section>
 
       <section id="change-log" class="section searchable">
         <div class="section-header">
           <div><span class="section-kicker">Change Management</span><h2>Nhật ký thay đổi</h2></div>
-          <button id="addChange" class="button button-secondary">+ Thêm thay đổi</button>
+          <button id="addChange" class="button button-secondary" data-permission="state:write">+ Thêm thay đổi</button>
         </div>
         <div class="table-shell">
           <table>
@@ -430,8 +516,8 @@
       </section>
 
       <footer class="page-footer">
-        <div><strong>Bếp Bình Mỹ · PM Handover Portal</strong><span>Tài liệu nội bộ — không chia sẻ công khai.</span></div>
-        <div>Version 5.0 · Cloudflare</div>
+        <div><strong>Bếp Bình Mỹ · PM Handover Portal</strong><span>Tài liệu nội bộ — kiểm soát tài khoản, vai trò và IP.</span></div>
+        <div>Version 6.1 · Cloudflare Security Layer</div>
       </footer>
     </main>
   </div>

@@ -1,0 +1,13 @@
+{
+  "name": "tai-lieu-van-hanh-bep",
+  "version": "6.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/worker.test.mjs",
+    "deploy": "npx wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.92.0"
+  }
+}

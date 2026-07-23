@@ -12,4 +12,6 @@
 10. RACI
 11. Handover Acceptance
 12. Credential Register
-13. Change Management
+13. User & IP Access Governance
+14. IP Access Audit Log
+15. Change Management
