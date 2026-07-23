@@ -15,13 +15,20 @@ BẾP BÌNH MỸ · PORTAL VẬN HÀNH 6.2
 
 2. DEPLOY
 
-Mở Terminal tại thư mục project và chạy:
+Chạy thử local:
 
-  npx wrangler secret put SESSION_SECRET
+  npm install
+  npm run dev
 
-Nhập một chuỗi ngẫu nhiên tối thiểu 32 ký tự, sau đó chạy:
+Không mở trực tiếp public/index.html vì bản tĩnh không chạy API đăng nhập.
 
-  npx wrangler deploy
+Deploy production:
+
+  npm run secret:set
+
+Nhập một chuỗi ngẫu nhiên tối thiểu 32 ký tự, sau đó:
+
+  npm run deploy
 
 Mở URL workers.dev hoặc custom domain do Cloudflare trả về.
 
@@ -46,30 +53,16 @@ Ngay sau lần đăng nhập đầu:
 
 Admin, Operator và Viewer chỉ bị giới hạn theo quyền tài khoản, không theo IP.
 
-4. IP NÀO ĐƯỢC PHÉP
+4. NHẬT KÝ IP
 
-Nên thêm:
-
-- IP Internet tĩnh của văn phòng quản trị: quyền Admin.
-- IP đầu ra VPN của đội kỹ thuật: quyền Admin.
-- IP Internet tĩnh của mạng Bếp: quyền Operator.
-- IP chỉ đọc cho quản lý: quyền Viewer, nếu thật sự cần.
-- IP khẩn cấp: đặt ngày hết hạn ngắn và tắt sau khi xử lý.
-
-Không thêm:
-
-- 0.0.0.0/0 hoặc ::/0.
-- IP nội bộ 192.168.x.x, 10.x.x.x, 172.16-31.x.x.
-- Dải IP quá rộng.
-- IP Wi-Fi công cộng.
-
-Cloudflare nhìn thấy IP Internet công cộng qua CF-Connecting-IP. Nếu đường
-truyền dùng IP động, ưu tiên VPN có IP đầu ra cố định trước khi bật cưỡng chế.
+IP không cần khai báo trước và không được dùng để chặn. Cloudflare ghi nhận IP
+Internet công cộng qua CF-Connecting-IP; Worker lưu IP này vào audit cùng user,
+role, thời gian, thiết bị và vị trí Cloudflare để truy vết.
 
 5. PHÂN QUYỀN
 
-- Admin gốc: toàn quyền tài liệu, link hệ thống, user, IP và audit log; bỏ qua chặn IP.
-- Admin phụ: toàn quyền nhưng vẫn chịu IP policy khi bật.
+- Admin gốc: toàn quyền tài liệu, link hệ thống, user và audit log.
+- Admin phụ: toàn quyền theo RBAC.
 - Operator: đọc tài liệu, mở web vận hành, cập nhật checklist/nhật ký.
 - Viewer: chỉ đọc; không thấy tài khoản, user, IP hoặc log.
 

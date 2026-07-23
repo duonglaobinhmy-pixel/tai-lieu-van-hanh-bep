@@ -72,7 +72,15 @@ async function apiFetch(url, options = {}) {
     headers,
     credentials: "same-origin"
   });
-  const data = await response.json().catch(() => ({}));
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json().catch(() => ({}))
+    : {};
+  if (!contentType.includes("application/json")) {
+    const error = new Error("WORKER_API_UNAVAILABLE");
+    error.status = response.status;
+    throw error;
+  }
   if (!response.ok) {
     const error = new Error(data.error || "API_ERROR");
     error.status = response.status;
@@ -121,8 +129,10 @@ function applyAccess() {
 
 function loginErrorMessage(error) {
   if (error.message === "INVALID_CREDENTIALS") return "Tên đăng nhập hoặc mật khẩu không đúng.";
-  if (error.message === "IP_NOT_ALLOWED") return "IP hiện tại không nằm trong danh sách được phép.";
   if (error.message === "TOO_MANY_ATTEMPTS") return "Đã nhập sai quá nhiều lần. Vui lòng chờ rồi thử lại.";
+  if (error.message === "WORKER_API_UNAVAILABLE") {
+    return "Trang đang mở ở chế độ xem tĩnh nên API đăng nhập chưa chạy. Hãy dùng npm run dev hoặc URL sau khi deploy Worker.";
+  }
   return "Không thể đăng nhập. Kiểm tra kết nối hoặc cấu hình Worker.";
 }
 

@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "wrangler dev --local --var SESSION_SECRET:local-development-secret-bep-binh-my-2026",
     "test": "node --test tests/worker.test.mjs",
-    "deploy": "npx wrangler deploy"
+    "check": "wrangler deploy --dry-run",
+    "secret:set": "wrangler secret put SESSION_SECRET",
+    "deploy": "wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.92.0"
